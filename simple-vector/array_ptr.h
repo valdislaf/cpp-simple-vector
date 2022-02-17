@@ -6,14 +6,14 @@
 
 
 template <typename Type>
-class Array_Ptr {
+class ArrayPtr {
 public:
-    // Инициализирует Array_Ptr нулевым указателем
-    Array_Ptr() = default;
+    // Инициализирует ArrayPtr нулевым указателем
+    ArrayPtr() = default;
 
     // Создаёт в куче массив из size элементов типа Type.
     // Если size == 0, поле raw_ptr_ должно быть равно nullptr
-    explicit Array_Ptr(size_t size) {
+    explicit ArrayPtr(size_t size) {
         if (size == 0) {
             raw_ptr_ = std::move(nullptr);
         }
@@ -23,19 +23,19 @@ public:
     }
 
     // Конструктор из сырого указателя, хранящего адрес массива в куче либо nullptr
-    explicit Array_Ptr(Type* raw_ptr) noexcept {
+    explicit ArrayPtr(Type* raw_ptr) noexcept {
         raw_ptr_ = std::move(raw_ptr);
     }
 
     // Запрещаем копирование
-    Array_Ptr(const Array_Ptr&) = delete;
+    ArrayPtr(const ArrayPtr&) = delete;
 
-    ~Array_Ptr() {
+    ~ArrayPtr() {
         delete[]  raw_ptr_;
     }
 
     // Запрещаем присваивание
-    Array_Ptr& operator=(const Array_Ptr&) = delete;
+    ArrayPtr& operator=(const ArrayPtr&) = delete;
 
     // Прекращает владением массивом в памяти, возвращает значение адреса массива
     // После вызова метода указатель на массив должен обнулиться
@@ -69,7 +69,7 @@ public:
     }
 
     // Обменивается значениям указателя на массив с объектом other
-    void swap(Array_Ptr& other) noexcept {
+    void swap(ArrayPtr& other) noexcept {
         std::swap(other.raw_ptr_, raw_ptr_);
     }
 

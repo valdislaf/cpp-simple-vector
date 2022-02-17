@@ -30,7 +30,7 @@ public:
 
     // Создаёт вектор из size элементов, инициализированных значением value
     SimpleVector(size_t size, const Type& value) {
-        Array_Ptr<Type> simpleVector(size);
+        ArrayPtr<Type> simpleVector(size);
         simpleVector_.swap(simpleVector);
         std::fill(simpleVector_.Get(), simpleVector_.Get() + size, value);
         size_ = size;
@@ -39,7 +39,7 @@ public:
 
     // Создаёт вектор из std::initializer_list
     SimpleVector(std::initializer_list<Type> init) {
-        Array_Ptr<Type> tmp1(init.size());
+        ArrayPtr<Type> tmp1(init.size());
         size_ = init.size();
         std::copy(init.begin(), init.end(), tmp1.Get());
         simpleVector_.swap(tmp1);
@@ -52,7 +52,7 @@ public:
 
     void Reserve(size_t new_capacity) {
         if (new_capacity > capacity_) {
-            Array_Ptr<Type> new_array(new_capacity);
+            ArrayPtr<Type> new_array(new_capacity);
             std::copy(simpleVector_.Get(), simpleVector_.Get() + size_, new_array.Get());
             simpleVector_.swap(new_array);
             capacity_ = new_capacity;
@@ -114,25 +114,21 @@ public:
     // Изменяет размер массива.
    // При увеличении размера новые элементы получают значение по умолчанию для типа Type
     void Resize(size_t new_size) {
-        if (new_size <= size_) {
-            size_ = new_size;
-        }
-        else if (new_size <= capacity_) {
+        if (new_size <= capacity_) {
             std::fill(simpleVector_.Get() + size_, simpleVector_.Get() + capacity_, Type());
             size_ = new_size;
         }
         if (new_size > capacity_) {
-            size_t sz_pred = size_;
+            size_t old_size = size_;
             if (new_size > 2 * capacity_) {
-                size_ = new_size;
                 Relocation(new_size);
             }
             if (new_size <= 2 * capacity_) {
-                size_ = new_size;
                 Relocation(2 * capacity_);
             }
-            std::fill(simpleVector_.Get() + sz_pred, simpleVector_.Get() + capacity_, Type());
+            std::fill(simpleVector_.Get() + old_size, simpleVector_.Get() + capacity_, Type());
         }
+        size_ = new_size;
     }
 
     SimpleVector(SimpleVector&& other) {
@@ -149,7 +145,7 @@ public:
     }
 
     SimpleVector(const SimpleVector& other) {
-        Array_Ptr<Type> tmp1(other.GetSize());
+        ArrayPtr<Type> tmp1(other.GetSize());
         size_ = other.GetSize();
         std::copy(other.begin(), other.end(), tmp1.Get());
         simpleVector_.swap(tmp1);
@@ -187,7 +183,7 @@ public:
             else {
                 capacity = 2 * capacity_;
             }
-            Array_Ptr<Type> new_array(capacity);
+            ArrayPtr<Type> new_array(capacity);
             std::copy(simpleVector_.Get(), simpleVector_.Get() + size_, new_array.Get());
             simpleVector_.swap(new_array);
             simpleVector_[size_] = item;
@@ -209,7 +205,7 @@ public:
             else {
                 capacity = 2 * capacity_;
             }
-            Array_Ptr<Type> new_array(capacity);
+            ArrayPtr<Type> new_array(capacity);
             std::move(std::make_move_iterator(simpleVector_.Get()), std::make_move_iterator(simpleVector_.Get() + size_), new_array.Get());
             simpleVector_.swap(new_array);
             simpleVector_[size_] = std::move(item);
@@ -228,14 +224,14 @@ public:
         if (capacity_ == 0) {
             capacity_ = 1;
             ++size_;
-            Array_Ptr<Type> simpleVector(1);
+            ArrayPtr<Type> simpleVector(1);
             simpleVector_.swap(simpleVector);
             simpleVector_[0] = value;
             return simpleVector_.Get();
         }
         else if (size_ == capacity_) {
             capacity = 2 * capacity_;
-            Array_Ptr<Type> new_array(capacity);
+            ArrayPtr<Type> new_array(capacity);
             std::copy(simpleVector_.Get(), pos, new_array.Get());
             Iterator new_pos = new_array.Get();
             Iterator begin_old = simpleVector_.Get();
@@ -268,14 +264,14 @@ public:
         if (capacity_ == 0) {
             capacity_ = 1;
             ++size_;
-            Array_Ptr<Type> simpleVector(1);
+            ArrayPtr<Type> simpleVector(1);
             simpleVector_.swap(simpleVector);
             simpleVector_[0] = std::move(value);
             return simpleVector_.Get();
         }
         else if (size_ == capacity_) {
             capacity = 2 * capacity_;
-            Array_Ptr<Type> new_array(capacity);
+            ArrayPtr<Type> new_array(capacity);
             std::move(std::make_move_iterator(simpleVector_.Get()), std::make_move_iterator(pos), new_array.Get());
             Iterator new_pos = std::move(new_array.Get());
             Iterator begin_old = std::move(simpleVector_.Get());
@@ -363,12 +359,12 @@ public:
     }
 
 private:
-    Array_Ptr<Type>simpleVector_{};
+    ArrayPtr<Type>simpleVector_{};
     size_t size_{};
     size_t capacity_{};
 
     void Relocation(size_t new_size) {
-        Array_Ptr<Type> new_array(new_size);
+        ArrayPtr<Type> new_array(new_size);
         std::copy(simpleVector_.Get(), simpleVector_.Get() + size_, new_array.Get());
         simpleVector_.swap(new_array);
         capacity_ = new_size;
